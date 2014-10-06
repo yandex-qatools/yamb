@@ -15,7 +15,7 @@ Basic example
 
 
  class Address(YAMBObject):
-     city = Literal('New York')
+     city = Literal(default='New York')
      street = Literal()
 
  class Person(YAMBObject):
