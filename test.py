@@ -7,17 +7,17 @@ import pytest
 
 from hamcrest import assert_that, has_properties, has_property, is_, contains, has_string, contains_string, all_of
 
-from yamb import YAMLY, Attr, Another, Many
+from yamb import YAMBObject, Literal, Nested, Collection
 
 
-class Foo(YAMLY):
+class Foo(YAMBObject):
     __tag__ = 'Foo'
 
-    bar = Attr()
-    baz = Attr()
+    bar = Literal()
+    baz = Literal()
 
 
-def test_yamly_load():
+def test_load():
     foo = Foo._load('''
 bar: 1
 baz: 'ololo'
@@ -26,7 +26,7 @@ baz: 'ololo'
     assert_that(foo, has_properties(bar=1, baz='ololo'))
 
 
-def test_yamly_save():
+def test_save():
     foo = Foo(bar=2, baz='pewpew')
 
     assert_that(yaml.load(foo._dump()), is_(dict(bar=2, baz='pewpew')))
@@ -34,8 +34,8 @@ def test_yamly_save():
 
 @pytest.mark.parametrize('value', [5, 'a', []])
 def test_default_load(value):
-    class Simple(YAMLY):
-        a = Attr(default=value)
+    class Simple(YAMBObject):
+        a = Literal(default=value)
 
     assert_that(Simple._load('{}'), has_properties(a=value))
 
@@ -49,9 +49,9 @@ def test_roundabout_save():
     assert_that(Foo._load(foo._dump()), has_property('bar', 5))
 
 
-class Bar(YAMLY):
-    foo = Another(Foo)
-    thing = Attr()
+class Bar(YAMBObject):
+    foo = Nested(Foo)
+    thing = Literal()
 
 
 def test_another_load():
@@ -85,12 +85,12 @@ def test_another_as_argument():
     assert_that(yaml.load(bar._dump()), is_(dict(foo=dict(bar='test', baz='values'))))
 
 
-class Thing(YAMLY):
-    value = Attr()
+class Thing(YAMBObject):
+    value = Literal()
 
 
-class Lots(YAMLY):
-    things = Many(Thing)
+class Lots(YAMBObject):
+    things = Collection(Thing)
 
 
 def test_many_load():
@@ -192,8 +192,8 @@ def test_nondeclared_attributes_at_constructor():
 
 
 def test_fields_settable():
-    class Test(YAMLY):
-        a = Attr()
+    class Test(YAMBObject):
+        a = Literal()
         b = None
 
     x = Test()

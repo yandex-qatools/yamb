@@ -9,11 +9,14 @@ from abc import ABCMeta, abstractmethod
 from collections import MutableSequence
 
 
-class YamlyThing(object):
+__all__ = ['YAMBObject', 'YAMBMeta', 'Literal', 'Nested', 'Collection']
+
+
+class YambProperty(object):
     __metaclass__ = ABCMeta
 
     """
-    A base primitive for saving-dumping stuff
+    Interface for all yaml facade objects
     """
 
     @abstractmethod
@@ -25,9 +28,11 @@ class YamlyThing(object):
         """ this method is called to convert Python facade-like object to the YAML-value"""
 
 
-class Attr(YamlyThing):
+class Literal(YambProperty):
     """
-    Just a basic attribute -- fits for primitives
+    Literal property -- will be passed to :py:mod:`yaml` as-is.
+
+    Fits for primitive values -- strings, numbers, etc.
 
     :arg default: default value
     """
@@ -45,9 +50,9 @@ class Attr(YamlyThing):
         return value
 
 
-class Another(YamlyThing):
+class Nested(YambProperty):
     """
-    An instance of another YAMLY class
+    Nested :py:class:`YAMBObject` instance.
     """
     def __init__(self, clazz):
         self.clazz = clazz
@@ -59,13 +64,13 @@ class Another(YamlyThing):
         return value._dump(top=False)
 
 
-class Many(Another):
+class Collection(Nested):
     """
-    A collection of many YAMLY instances
+    A list of :py:class:`YAMBObject`s
     """
 
     def _load(self, value):
-        one = super(Many, self)
+        one = super(Collection, self)
 
         class ListProxy(MutableSequence):
             def __init__(self, actual_list):
@@ -89,18 +94,20 @@ class Many(Another):
         return ListProxy(value)
 
     def _dump(self, value):
-        return [super(Many, self)._dump(x) for x in value]
+        return [super(Collection, self)._dump(x) for x in value]
 
 
-class YAMLYMeta(type):
+class YAMBMeta(type):
     """
-    A yaml-proxying metaclass -- a Facade for the real data loaded from the document.
+    A yaml-proxying metaclass -- a facade for the real data loaded from the document.
 
     Represents a YAML mapping as a Python object with attributes and real-like interactions.
+
+    Apply to a class with some :py:class:`YambProperty` entries as in test example.
     """
 
     def __new__(self, name, bases, kw):
-        things = {n: v for (n, v) in kw.items() if isinstance(v, YamlyThing)}
+        things = {n: v for (n, v) in kw.items() if isinstance(v, YambProperty)}
         stuff = {n: v for (n, v) in kw.items() if n not in things}
 
         class YAMLYBase(object):
@@ -142,11 +149,11 @@ class YAMLYMeta(type):
                 else:
                     raise AttributeError
 
-        return super(YAMLYMeta, self).__new__(self, name, (YAMLYBase,) + bases, stuff)
+        return super(YAMBMeta, self).__new__(self, name, (YAMLYBase,) + bases, stuff)
 
 
-class YAMLY(object):
+class YAMBObject(object):
     """
-    Convenience base class for YAML-mapped entities
+    Convenience base class for YAML-mapped classes
     """
-    __metaclass__ = YAMLYMeta
+    __metaclass__ = YAMBMeta
