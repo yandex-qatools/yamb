@@ -1,6 +1,10 @@
 yamb
 ====
 
+.. image:: https://travis-ci.org/yandex-qatools/yamb.svg?branch=master 
+        :alt: Build Status
+        :target: https://travis-ci.org/yandex-qatools/yamb/
+
 YAml Meta Binding microframework
 
 Define schema for YAML documents a-la SQLAlchemy to read, write and manipulate data like a python object.
