@@ -4,7 +4,7 @@ import setuptools
 
 setuptools.setup(
     name='yamb',
-    version='0.1',
+    version='0.1.1',
     license='Apache License, Version 2.0',
     author="Ivan Kalinin",
     author_email="pupssman@yandex-team.ru",
@@ -16,5 +16,6 @@ setuptools.setup(
                 'Intended Audience :: Developers',
                 'License :: OSI Approved :: Apache Software License',
                 'Operating System :: OS Independent',
-                'Programming Language :: Python'],
+                'Programming Language :: Python',
+                'Topic :: Software Development'],
 )
