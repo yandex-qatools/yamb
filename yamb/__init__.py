@@ -129,10 +129,10 @@ class YAMBMeta(type):
                     return cls._load(doc, top=False)
                 return cls(_data=document)
 
-            def _dump(self, top=True):
+            def _dump(self, top=True, **kw):
                 if top:
                     doc = self._dump(top=False)
-                    return yaml.dump(doc)
+                    return yaml.dump(doc, **kw)
                 else:
                     return self._data
 
